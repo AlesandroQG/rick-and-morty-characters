@@ -72,10 +72,38 @@ table {
   background-color: #03b1c8;
 }
 
-ul {  
-  padding-top: 100px;
-  list-style: none;
+#character-list {
+    padding-top: 100px;
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
 }
 
+.character-container {
+    width: 200px;
+    padding: 5px;
+    border: 2px solid gray;
+}
 
+.character-container img {
+    width: 200px;
+}
 
+.character-container p>span {
+    font-weight: bold;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  appearance: textfield;
+}
