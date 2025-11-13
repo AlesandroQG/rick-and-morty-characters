@@ -1,11 +1,12 @@
 let page = 1;
-const pages = 42;
+let totalPages = 42;
 
-const previous = document.getElementById("prev-page");
-const next = document.getElementById("next-page");
+const previousPage = document.getElementById("prev-page");
+const nextPage = document.getElementById("next-page");
 const pageNumber = document.getElementById("page-number");
+const totalPagesSpan = document.getElementById("total-pages");
 
-const list = document.getElementById("character-list");
+const characterList = document.getElementById("character-list");
 
 const template = (character) => {
     return `<li class="character-container">
@@ -16,34 +17,59 @@ const template = (character) => {
 };
 
 function hacerPeticion() {
-    console.log("Page " + page + "/" + pages);
+    console.log("Page " + page + "/" + totalPages);
     pageNumber.value = page;
+    disableButtons();
     fetch("https://rickandmortyapi.com/api/character/?page=" + page)
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error("Unable to obtain data");
-            }
-            return response.json();
-        })
-        .then((data) => {
-            const characters = data.results;
-            const structure = characters.map(character => template(character)).join("");
-            list.innerHTML = structure;
-        })
-        .catch((error) => {
-            console.error(error);
-        });
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error(`Error en la petición: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then((data) => {
+        totalPages = data.info.pages;
+        totalPagesSpan.textContent = totalPages;
+        const characters = data.results;
+        const structure = characters.map(character => template(character)).join("");
+        characterList.innerHTML = structure;
+    })
+    .catch((error) => {
+        console.error(error);
+        characterList.innerHTML = `<p class="error">${error}</p>`;
+    });
 }
 
-previous.addEventListener("click", () => {
+function disableButtons() {
+    nextPage.setAttribute("disabled", true);
+    previousPage.setAttribute("disabled", true);
+    setTimeout(() => {
+        pageNumberCheck();
+    }, 500);
+}
+
+function pageNumberCheck() {
+    if (page <= 1) {
+        previousPage.setAttribute("disabled", true);
+        nextPage.removeAttribute("disabled");
+    } else if (page >= totalPages) {
+        nextPage.setAttribute("disabled", true);
+        previousPage.removeAttribute("disabled");
+    } else {
+        nextPage.removeAttribute("disabled");
+        previousPage.removeAttribute("disabled");
+    }
+}
+
+previousPage.addEventListener("click", () => {
     if (page > 1) {
         page--;
         hacerPeticion();
     }
 });
 
-next.addEventListener("click", () => {
-    if (page < pages) {
+nextPage.addEventListener("click", () => {
+    if (page < totalPages) {
         page++;
         hacerPeticion();
     }
@@ -51,7 +77,7 @@ next.addEventListener("click", () => {
 
 pageNumber.addEventListener("blur", (e) => {
     const value = e.target.value;
-    if (value < 1 || value > pages) {
+    if (value < 1 || value > totalPages) {
         e.target.value = page;
     } else {
         page = value;
@@ -59,4 +85,6 @@ pageNumber.addEventListener("blur", (e) => {
     }
 });
 
-hacerPeticion();
+window.onload = function() {
+    hacerPeticion();
+}
